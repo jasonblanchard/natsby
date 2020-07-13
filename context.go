@@ -15,6 +15,7 @@ type Context struct {
 	engine           *Engine
 	Err              error
 	Logger           *zerolog.Logger
+	Keys             map[string]interface{}
 }
 
 // Next to be called in middleware to invoke the middleware chain
@@ -28,4 +29,14 @@ func (c *Context) Next() {
 
 func (c *Context) reset() {
 	c.index = -1
+}
+
+// Set sets arbitrary value that will be available in the context map
+func (c *Context) Set(k string, v interface{}) {
+	c.Keys[k] = v
+}
+
+// Get gets arbirary value from the context map
+func (c *Context) Get(k string) interface{} {
+	return c.Keys[k]
 }

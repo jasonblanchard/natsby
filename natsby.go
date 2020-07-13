@@ -71,6 +71,7 @@ func (e *Engine) Run() error {
 					handlers: subscriber.Handlers,
 					engine:   e,
 					Logger:   e.Logger,
+					Keys:     make(map[string]interface{}),
 				}
 				c.reset()
 				c.Next()
