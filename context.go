@@ -1,6 +1,9 @@
 package natsby
 
-import "github.com/nats-io/nats.go"
+import (
+	"github.com/nats-io/nats.go"
+	"github.com/rs/zerolog"
+)
 
 // Context context that's passed through handlers and middleware
 type Context struct {
@@ -11,6 +14,7 @@ type Context struct {
 	index            int8
 	engine           *Engine
 	Err              error
+	Logger           *zerolog.Logger
 }
 
 // Next to be called in middleware to invoke the middleware chain

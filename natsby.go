@@ -64,17 +64,20 @@ func (e *Engine) combineHandlers(handlers HandlersChain) HandlersChain {
 // Run starts all the subscribers
 func (e *Engine) Run() error {
 	for _, subscriber := range e.Subscribers {
-		handler := func(m *nats.Msg) {
-			c := &Context{
-				Msg:      m,
-				handlers: subscriber.Handlers,
-				engine:   e,
+		func(subscriber *Subscriber) {
+			handler := func(m *nats.Msg) {
+				c := &Context{
+					Msg:      m,
+					handlers: subscriber.Handlers,
+					engine:   e,
+					Logger:   e.Logger,
+				}
+				c.reset()
+				c.Next()
 			}
-			c.reset()
-			c.Next()
-		}
 
-		e.NatsConnection.Subscribe(subscriber.Subject, handler)
+			e.NatsConnection.Subscribe(subscriber.Subject, handler)
+		}(subscriber)
 	}
 
 	return nil
