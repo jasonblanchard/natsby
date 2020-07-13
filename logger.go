@@ -29,6 +29,7 @@ func WithLogger() HandlerFunc {
 				Str("subject", c.Msg.Subject).
 				Err(c.Err).
 				Msg(fmt.Sprintf("%+v", c.Err))
+			return
 		}
 
 		c.engine.Logger.Info().

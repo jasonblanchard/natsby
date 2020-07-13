@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"os/signal"
@@ -71,15 +72,18 @@ func main() {
 	engine.Subscribe("store.greeting.set", natsby.WithByteReply(), withDb(db), func(c *natsby.Context) {
 		db, ok := c.Get("db").(*dB)
 		if ok != true {
-			c.Err = err
+			c.Err = errors.New("DB not what I expected")
+			return
 		}
+
 		db.Set("greeting", string(c.Msg.Data))
 	})
 
 	engine.Subscribe("store.greeting.get", natsby.WithByteReply(), withDb(db), func(c *natsby.Context) {
 		db, ok := c.Get("db").(*dB)
 		if ok != true {
-			c.Err = err
+			c.Err = errors.New("DB not what I expected")
+			return
 		}
 		greeting := db.Get("greeting")
 		c.ByteReplyPayload = []byte(greeting)
