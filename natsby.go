@@ -35,6 +35,8 @@ func New(options ...func(*Engine) error) (*Engine, error) {
 		err = option(e)
 	}
 
+	// TODO: New should work without any options
+
 	return e, err
 }
 
@@ -69,7 +71,7 @@ func (e *Engine) Run() error {
 				c := &Context{
 					Msg:      m,
 					handlers: subscriber.Handlers,
-					engine:   e,
+					Engine:   e,
 					Logger:   e.Logger,
 					Keys:     make(map[string]interface{}),
 				}

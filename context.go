@@ -12,7 +12,7 @@ type Context struct {
 	ByteReplyPayload []byte
 	JSONReplyPayload interface{}
 	index            int8
-	engine           *Engine
+	Engine           *Engine // TODO: Exposing too much?
 	Err              error
 	Logger           *zerolog.Logger
 	Keys             map[string]interface{}

@@ -8,12 +8,12 @@ import (
 // WithLogger wraps handler with logging
 func WithLogger() HandlerFunc {
 	return func(c *Context) {
-		if c.engine.Logger == nil {
+		if c.Engine.Logger == nil {
 			c.Next()
 			return
 		}
 
-		c.engine.Logger.Debug().
+		c.Engine.Logger.Debug().
 			Str("subject", c.Msg.Subject).
 			Msg("received")
 
@@ -25,14 +25,14 @@ func WithLogger() HandlerFunc {
 		latency := end.Sub(start)
 
 		if c.Err != nil {
-			c.engine.Logger.Error().
+			c.Engine.Logger.Error().
 				Str("subject", c.Msg.Subject).
 				Err(c.Err).
 				Msg(fmt.Sprintf("%+v", c.Err))
 			return
 		}
 
-		c.engine.Logger.Info().
+		c.Engine.Logger.Info().
 			Str("subject", c.Msg.Subject).
 			Dur("latencyMS", latency).
 			Str("replyChan", c.Msg.Reply).
