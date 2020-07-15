@@ -93,6 +93,8 @@ func (e *Engine) Run(cbs ...func()) error {
 
 	<-e.done
 
+	e.NatsConnection.Drain()
+
 	return nil
 }
 
