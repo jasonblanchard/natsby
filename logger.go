@@ -27,6 +27,8 @@ func WithLogger() HandlerFunc {
 		if c.Err != nil {
 			c.Engine.Logger.Error().
 				Str("subject", c.Msg.Subject).
+				Dur("latencyMS", latency).
+				Str("replyChan", c.Msg.Reply).
 				Err(c.Err).
 				Msg(fmt.Sprintf("%+v", c.Err))
 			return

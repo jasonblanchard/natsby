@@ -3,9 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/signal"
-	"runtime"
-	"syscall"
 	"time"
 
 	"github.com/jasonblanchard/natsby"
@@ -53,21 +50,7 @@ func main() {
 		c.JSONReplyPayload = payload
 	})
 
-	err = engine.Run()
-
-	if err != nil {
-		panic(err)
-	}
-
-	fmt.Println("Ready 🚀")
-
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGINT)
-	go func() {
-		// Wait for signal
-		<-c
-		engine.NatsConnection.Drain()
-		os.Exit(0)
-	}()
-	runtime.Goexit()
+	engine.Run(func() {
+		fmt.Println("Ready 🚀")
+	})
 }

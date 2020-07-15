@@ -24,11 +24,14 @@ type Engine struct {
 	Logger                *zerolog.Logger
 	Subscribers           []*Subscriber
 	middleware            HandlersChain
+	done                  chan bool
 }
 
 // New creates a new Router object
 func New(options ...func(*Engine) error) (*Engine, error) {
-	e := &Engine{}
+	e := &Engine{
+		done: make(chan bool),
+	}
 	var err error
 
 	for _, option := range options {
@@ -63,8 +66,8 @@ func (e *Engine) combineHandlers(handlers HandlersChain) HandlersChain {
 	return mergedHandlers
 }
 
-// Run starts all the subscribers
-func (e *Engine) Run() error {
+// Run starts all the subscribers and blocks
+func (e *Engine) Run(cbs ...func()) error {
 	for _, subscriber := range e.Subscribers {
 		func(subscriber *Subscriber) {
 			handler := func(m *nats.Msg) {
@@ -79,9 +82,22 @@ func (e *Engine) Run() error {
 				c.Next()
 			}
 
+			// TODO: Allow for QueueSubscribe if a queue name has been passed in
 			e.NatsConnection.Subscribe(subscriber.Subject, handler)
 		}(subscriber)
 	}
 
+	for _, cb := range cbs {
+		cb()
+	}
+
+	<-e.done
+
 	return nil
+}
+
+// Close terminate all listeners
+func (e *Engine) Close() {
+	e.Logger.Info().Msg("Closing natsby listeners")
+	e.done <- true
 }
