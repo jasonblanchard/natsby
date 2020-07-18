@@ -3,12 +3,8 @@ package main
 import (
 	"errors"
 	"fmt"
-	"os"
-	"time"
 
 	"github.com/jasonblanchard/natsby"
-	"github.com/nats-io/nats.go"
-	"github.com/rs/zerolog"
 )
 
 type dB struct {
@@ -39,25 +35,7 @@ func withDb(db *dB) natsby.HandlerFunc {
 }
 
 func main() {
-	configureLogger := func(e *natsby.Engine) error {
-		logger := zerolog.New(os.Stderr).With().Timestamp().Logger()
-		logger = zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-		zerolog.DurationFieldUnit = time.Second
-		e.Logger = &logger
-		return nil
-	}
-
-	configureNATS := func(e *natsby.Engine) error {
-		nc, err := nats.Connect(nats.DefaultURL)
-		if err != nil {
-			return err
-		}
-		e.NatsConnection = nc
-		return nil
-	}
-
-	engine, err := natsby.New(configureNATS, configureLogger)
+	engine, err := natsby.New()
 	if err != nil {
 		panic(err)
 	}

@@ -1,6 +1,9 @@
 package natsby
 
 import (
+	"os"
+	"time"
+
 	"github.com/nats-io/nats.go"
 	"github.com/rs/zerolog"
 )
@@ -25,6 +28,7 @@ type Engine struct {
 	Subscribers           []*Subscriber
 	middleware            HandlersChain
 	done                  chan bool
+	queueGroup            string
 }
 
 // New creates a new Router object
@@ -38,7 +42,19 @@ func New(options ...func(*Engine) error) (*Engine, error) {
 		err = option(e)
 	}
 
-	// TODO: New should work without any options
+	if e.Logger == nil {
+		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
+		zerolog.DurationFieldUnit = time.Second
+		e.Logger = &logger
+	}
+
+	if e.NatsConnection == nil {
+		nc, err := nats.Connect(nats.DefaultURL)
+		if err != nil {
+			return e, err
+		}
+		e.NatsConnection = nc
+	}
 
 	return e, err
 }
@@ -82,8 +98,11 @@ func (e *Engine) Run(cbs ...func()) error {
 				c.Next()
 			}
 
-			// TODO: Allow for QueueSubscribe if a queue name has been passed in
-			e.NatsConnection.Subscribe(subscriber.Subject, handler)
+			if e.queueGroup == "" {
+				e.NatsConnection.Subscribe(subscriber.Subject, handler)
+				return
+			}
+			e.NatsConnection.QueueSubscribe(subscriber.Subject, e.queueGroup, handler)
 		}(subscriber)
 	}
 
@@ -98,8 +117,8 @@ func (e *Engine) Run(cbs ...func()) error {
 	return nil
 }
 
-// Close terminate all listeners
-func (e *Engine) Close() {
+// Shutdown terminates all listeners and drains connections
+func (e *Engine) Shutdown() {
 	e.Logger.Info().Msg("Closing natsby listeners")
 	e.done <- true
 }
