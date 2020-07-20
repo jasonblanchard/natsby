@@ -40,7 +40,7 @@ func main() {
 		panic(err)
 	}
 
-	engine.Use(natsby.WithLogger())
+	engine.Use(natsby.WithLogger(natsby.DefaultLogger()))
 
 	db := newDB()
 

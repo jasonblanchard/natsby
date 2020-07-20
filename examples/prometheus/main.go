@@ -12,7 +12,7 @@ func main() {
 		panic(err)
 	}
 
-	engine.Use(natsby.WithLogger())
+	engine.Use(natsby.WithLogger(natsby.DefaultLogger()))
 	engine.Use(natsby.WithPrometheus(&natsby.WithPrometheusInput{
 		Port: "2112",
 	}))

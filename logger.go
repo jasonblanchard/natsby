@@ -2,18 +2,23 @@ package natsby
 
 import (
 	"fmt"
+	"os"
 	"time"
+
+	"github.com/rs/zerolog"
 )
 
-// WithLogger wraps handler with logging
-func WithLogger() HandlerFunc {
-	return func(c *Context) {
-		if c.Engine.Logger == nil {
-			c.Next()
-			return
-		}
+// DefaultLogger sets up a simple zerolog instance
+func DefaultLogger() *zerolog.Logger {
+	logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
+	zerolog.DurationFieldUnit = time.Second
+	return &logger
+}
 
-		c.Engine.Logger.Debug().
+// WithLogger wraps handler with logging
+func WithLogger(logger *zerolog.Logger) HandlerFunc {
+	return func(c *Context) {
+		logger.Debug().
 			Str("subject", c.Msg.Subject).
 			Msg("received")
 
@@ -25,18 +30,18 @@ func WithLogger() HandlerFunc {
 		latency := end.Sub(start)
 
 		if c.Err != nil {
-			c.Engine.Logger.Error().
+			logger.Error().
 				Str("subject", c.Msg.Subject).
-				Dur("latencyMS", latency).
+				Dur("latency", latency).
 				Str("replyChan", c.Msg.Reply).
 				Err(c.Err).
 				Msg(fmt.Sprintf("%+v", c.Err))
 			return
 		}
 
-		c.Engine.Logger.Info().
+		logger.Info().
 			Str("subject", c.Msg.Subject).
-			Dur("latencyMS", latency).
+			Dur("latency", latency).
 			Str("replyChan", c.Msg.Reply).
 			Msg("processed")
 	}

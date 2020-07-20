@@ -2,7 +2,6 @@ package natsby
 
 import (
 	"github.com/nats-io/nats.go"
-	"github.com/rs/zerolog"
 )
 
 // Context context that's passed through handlers and middleware
@@ -15,7 +14,6 @@ type Context struct {
 	index            int8
 	Engine           *Engine // TODO: Exposing too much?
 	Err              error
-	Logger           *zerolog.Logger
 	Keys             map[string]interface{}
 }
 

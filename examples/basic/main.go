@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-
 	"github.com/jasonblanchard/natsby"
 )
 
@@ -12,14 +10,15 @@ func main() {
 		panic(err)
 	}
 
-	engine.Use(natsby.WithLogger())
+	logger := natsby.DefaultLogger()
+	engine.Use(natsby.WithLogger(logger))
 
 	engine.Subscribe("ping", natsby.WithByteReply(), func(c *natsby.Context) {
 		c.ByteReplyPayload = []byte("pong")
 	})
 
 	engine.Run(func() {
-		fmt.Println("Ready 🚀")
+		logger.Info().Msg("Ready 🚀")
 	})
 
 	// c := make(chan os.Signal, 1)

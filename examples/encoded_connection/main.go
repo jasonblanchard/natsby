@@ -24,7 +24,7 @@ func main() {
 		panic(err)
 	}
 
-	engine.Use(natsby.WithLogger())
+	engine.Use(natsby.WithLogger(natsby.DefaultLogger()))
 
 	engine.Subscribe("ping", natsby.WithJSONReply(), func(c *natsby.Context) {
 		type pinger struct {

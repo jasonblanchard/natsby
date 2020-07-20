@@ -1,11 +1,7 @@
 package natsby
 
 import (
-	"os"
-	"time"
-
 	"github.com/nats-io/nats.go"
-	"github.com/rs/zerolog"
 )
 
 // HandlerFunc defines handler used by middleware as return value
@@ -24,7 +20,6 @@ type Subscriber struct {
 type Engine struct {
 	NatsConnection        *nats.Conn
 	NatsEncodedConnection *nats.EncodedConn
-	Logger                *zerolog.Logger
 	Subscribers           []*Subscriber
 	middleware            HandlersChain
 	done                  chan bool
@@ -40,13 +35,6 @@ func New(options ...func(*Engine) error) (*Engine, error) {
 
 	for _, option := range options {
 		err = option(e)
-	}
-
-	// TODO: Move all logger initialization to middleware?
-	if e.Logger == nil {
-		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
-		zerolog.DurationFieldUnit = time.Second
-		e.Logger = &logger
 	}
 
 	if e.NatsConnection == nil {
@@ -92,7 +80,6 @@ func (e *Engine) Run(cbs ...func()) error {
 					Msg:      m,
 					handlers: subscriber.Handlers,
 					Engine:   e,
-					Logger:   e.Logger,
 					Keys:     make(map[string]interface{}),
 				}
 				c.reset()
@@ -120,6 +107,5 @@ func (e *Engine) Run(cbs ...func()) error {
 
 // Shutdown terminates all listeners and drains connections
 func (e *Engine) Shutdown() {
-	e.Logger.Info().Msg("Closing natsby listeners")
 	e.done <- true
 }
