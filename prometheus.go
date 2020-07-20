@@ -49,6 +49,11 @@ func WithPrometheus(input *WithPrometheusInput) HandlerFunc {
 		[]string{"subject"},
 	)
 
+	// TODO: Error sum
+	// Idea: introduce the concept of a "handled" vs "unhandled" error.
+	// "unhandled" is approximately equivalent to http 5xx errors.
+	// Alternatively: create error types like HTTP status codes
+
 	err := prometheus.Register(m.messagesReceivedCounter)
 	err = prometheus.Register(m.repliesSentCounter)
 	err = prometheus.Register(m.latencyHistogram)
@@ -64,7 +69,7 @@ func WithPrometheus(input *WithPrometheusInput) HandlerFunc {
 	}()
 
 	return func(c *Context) {
-		m.MessagesReceivedCounterInc(c.Msg.Subject)
+		m.messagesReceivedCounter.WithLabelValues(c.Msg.Subject).Inc()
 		start := time.Now()
 
 		c.Next()
@@ -72,31 +77,11 @@ func WithPrometheus(input *WithPrometheusInput) HandlerFunc {
 		_, ok := c.GetByteReplyPayload()
 
 		if ok == true {
-			m.RepliesSentCounterInc(c.Msg.Subject)
+			m.repliesSentCounter.WithLabelValues(c.Msg.Subject).Inc()
 		}
 
 		end := time.Now()
 		latency := end.Sub(start) // TODO: Duplicating latency calculation right now in logger
-		m.LatencyHistogramObserve(c.Msg.Subject, latency.Seconds())
+		m.latencyHistogram.WithLabelValues(c.Msg.Subject).Observe(latency.Seconds())
 	}
 }
-
-// MessagesReceivedCounterInc incremements messages received counter
-func (m *Metrics) MessagesReceivedCounterInc(subject string) {
-	m.messagesReceivedCounter.WithLabelValues(subject).Inc()
-}
-
-// RepliesSentCounterInc incremements messages received counter
-func (m *Metrics) RepliesSentCounterInc(subject string) {
-	m.repliesSentCounter.WithLabelValues(subject).Inc()
-}
-
-// LatencyHistogramObserve incremements messages received counter
-func (m *Metrics) LatencyHistogramObserve(subject string, value float64) {
-	m.latencyHistogram.WithLabelValues(subject).Observe(value)
-}
-
-// TODO: Error sum
-// Idea: introduce the concept of a "handled" vs "unhandled" error.
-// "unhandled" is approximately equivalent to http 5xx errors.
-// Alternatively: create error types like HTTP status codes
