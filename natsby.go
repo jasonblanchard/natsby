@@ -42,6 +42,7 @@ func New(options ...func(*Engine) error) (*Engine, error) {
 		err = option(e)
 	}
 
+	// TODO: Move all logger initialization to middleware?
 	if e.Logger == nil {
 		logger := zerolog.New(zerolog.ConsoleWriter{Out: os.Stderr}).With().Timestamp().Logger()
 		zerolog.DurationFieldUnit = time.Second

@@ -11,6 +11,7 @@ type Context struct {
 	handlers         HandlersChain
 	ByteReplyPayload []byte
 	JSONReplyPayload interface{}
+	didReply         bool
 	index            int8
 	Engine           *Engine // TODO: Exposing too much?
 	Err              error
@@ -39,4 +40,12 @@ func (c *Context) Set(k string, v interface{}) {
 // Get gets arbirary value from the context map
 func (c *Context) Get(k string) interface{} {
 	return c.Keys[k]
+}
+
+// GetByteReplyPayload getter for by reply payload with metadata about if it was set
+func (c *Context) GetByteReplyPayload() ([]byte, bool) {
+	if c.didReply == false {
+		return []byte(""), false
+	}
+	return c.ByteReplyPayload, true
 }
