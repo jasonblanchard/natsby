@@ -14,6 +14,7 @@ type Metrics struct {
 	messagesReceivedCounter *prometheus.CounterVec
 	repliesSentCounter      *prometheus.CounterVec
 	latencyHistogram        *prometheus.HistogramVec
+	errorsCounter           *prometheus.CounterVec
 }
 
 // WithPrometheusInput configuration for prometheus middleware
@@ -44,19 +45,24 @@ func WithPrometheus(input *WithPrometheusInput) HandlerFunc {
 	m.latencyHistogram = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name: "natsby_latency_histogram",
 		Help: "Histogram of latencies for message handling, partitioned by subject",
+		// TODO: Make this configurable
 		// Buckets: prometheus.LinearBuckets(20, 5, 5),
 	},
 		[]string{"subject"},
 	)
 
-	// TODO: Error sum
-	// Idea: introduce the concept of a "handled" vs "unhandled" error.
-	// "unhandled" is approximately equivalent to http 5xx errors.
-	// Alternatively: create error types like HTTP status codes
+	m.errorsCounter = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Name: "natsby_errors_by_subject",
+			Help: "Errors encountered, partitioned by subject.",
+		},
+		[]string{"subject"},
+	)
 
 	err := prometheus.Register(m.messagesReceivedCounter)
 	err = prometheus.Register(m.repliesSentCounter)
 	err = prometheus.Register(m.latencyHistogram)
+	err = prometheus.Register(m.errorsCounter)
 
 	if err != nil {
 		// TODO: Do something logical, here
@@ -83,5 +89,9 @@ func WithPrometheus(input *WithPrometheusInput) HandlerFunc {
 		end := time.Now()
 		latency := end.Sub(start) // TODO: Duplicating latency calculation right now in logger
 		m.latencyHistogram.WithLabelValues(c.Msg.Subject).Observe(latency.Seconds())
+
+		if c.Err != nil {
+			m.errorsCounter.WithLabelValues(c.Msg.Subject).Inc()
+		}
 	}
 }
