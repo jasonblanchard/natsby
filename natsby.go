@@ -28,7 +28,7 @@ type Engine struct {
 
 // New creates a new Router object
 // TODO: Make connection be a required first argument
-func New(options ...func(*Engine) error) (*Engine, error) {
+func New(nc *nats.Conn, options ...func(*Engine) error) (*Engine, error) {
 	e := &Engine{
 		done: make(chan bool),
 	}
@@ -38,13 +38,7 @@ func New(options ...func(*Engine) error) (*Engine, error) {
 		err = option(e)
 	}
 
-	if e.NatsConnection == nil {
-		nc, err := nats.Connect(nats.DefaultURL)
-		if err != nil {
-			return e, err
-		}
-		e.NatsConnection = nc
-	}
+	e.NatsConnection = nc
 
 	return e, err
 }

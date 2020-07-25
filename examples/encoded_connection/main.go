@@ -8,18 +8,18 @@ import (
 )
 
 func main() {
-	configureNATS := func(e *natsby.Engine) error {
-		nc, err := nats.Connect(nats.DefaultURL)
+	nc, err := nats.Connect(nats.DefaultURL)
+
+	configureEncodedConnection := func(e *natsby.Engine) error {
 		c, err := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 		if err != nil {
 			return err
 		}
-		e.NatsConnection = nc
 		e.NatsEncodedConnection = c
 		return nil
 	}
 
-	engine, err := natsby.New(configureNATS)
+	engine, err := natsby.New(nc, configureEncodedConnection)
 	if err != nil {
 		panic(err)
 	}

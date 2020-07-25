@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/jasonblanchard/natsby"
+	"github.com/nats-io/nats.go"
 )
 
 type dB struct {
@@ -35,7 +36,8 @@ func withDb(db *dB) natsby.HandlerFunc {
 }
 
 func main() {
-	engine, err := natsby.New()
+	nc, err := nats.Connect(nats.DefaultURL)
+	engine, err := natsby.New(nc)
 	if err != nil {
 		panic(err)
 	}

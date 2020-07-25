@@ -4,10 +4,12 @@ import (
 	"fmt"
 
 	"github.com/jasonblanchard/natsby"
+	"github.com/nats-io/nats.go"
 )
 
 func main() {
-	engine, err := natsby.New()
+	nc, err := nats.Connect(nats.DefaultURL)
+	engine, err := natsby.New(nc)
 	if err != nil {
 		panic(err)
 	}
