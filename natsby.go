@@ -20,13 +20,14 @@ type Subscriber struct {
 type Engine struct {
 	NatsConnection        *nats.Conn
 	NatsEncodedConnection *nats.EncodedConn
-	Subscribers           []*Subscriber
+	subscribers           []*Subscriber
 	middleware            HandlersChain
 	done                  chan bool
-	queueGroup            string
+	queueGroup            string // TODO: Make this configurable
 }
 
 // New creates a new Router object
+// TODO: Make connection be a required first argument
 func New(options ...func(*Engine) error) (*Engine, error) {
 	e := &Engine{
 		done: make(chan bool),
@@ -60,7 +61,7 @@ func (e *Engine) Subscribe(subject string, handlers ...HandlerFunc) {
 		Handlers: e.combineHandlers(handlers),
 	}
 
-	e.Subscribers = append(e.Subscribers, s)
+	e.subscribers = append(e.subscribers, s)
 }
 
 func (e *Engine) combineHandlers(handlers HandlersChain) HandlersChain {
@@ -73,7 +74,7 @@ func (e *Engine) combineHandlers(handlers HandlersChain) HandlersChain {
 
 // Run starts all the subscribers and blocks
 func (e *Engine) Run(cbs ...func()) error {
-	for _, subscriber := range e.Subscribers {
+	for _, subscriber := range e.subscribers {
 		func(subscriber *Subscriber) {
 			handler := func(m *nats.Msg) {
 				c := &Context{
