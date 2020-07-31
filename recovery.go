@@ -1,6 +1,10 @@
 package natsby
 
-import "log"
+import (
+	"fmt"
+	"log"
+	"runtime/debug"
+)
 
 // RecoveryFunc defines the function passable to CustomRecovery.
 type RecoveryFunc func(c *Context, err interface{})
@@ -16,14 +20,14 @@ func WithCustomRecovery(handle RecoveryFunc) HandlerFunc {
 }
 
 func defaultRecoveryFunc(c *Context, err interface{}) {
-	log.Printf("panic recovered %v", err)
-
+	c.Err = fmt.Errorf("Panic recovered: %v", err)
 }
 
 func recovery(handle RecoveryFunc) HandlerFunc {
 	return func(c *Context) {
 		defer func() {
 			if err := recover(); err != nil {
+				log.Printf("panic recovered %v %s", err, debug.Stack())
 				handle(c, err)
 			}
 		}()

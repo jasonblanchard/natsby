@@ -23,6 +23,7 @@ func main() {
 			c.Engine.NatsConnection.Publish(c.Msg.Reply, []byte("oops"))
 		}
 	}))
+	// engine.Use(natsby.WithRecovery())
 
 	engine.Subscribe("panic", natsby.WithByteReply(), func(c *natsby.Context) {
 		panic("oops")
