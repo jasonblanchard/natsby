@@ -36,6 +36,9 @@ func (c *Context) reset() {
 
 // Set sets arbitrary value that will be available in the context map
 func (c *Context) Set(k string, v interface{}) {
+	if c.Keys == nil {
+		c.Keys = make(map[string]interface{})
+	}
 	c.Keys[k] = v
 }
 
