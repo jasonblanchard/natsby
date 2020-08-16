@@ -8,17 +8,18 @@ import (
 
 // Context context that's passed through handlers and middleware
 type Context struct {
-	Msg              *nats.Msg
-	handlers         HandlersChain
-	ByteReplyPayload []byte
-	JSONReplyPayload interface{}
-	didReply         bool
-	index            int8
-	Engine           *Engine // TODO: Exposing too much?
-	Err              error
-	Keys             map[string]interface{}
-	outWriter        io.ReadWriter
-	errWriter        io.ReadWriter
+	Msg                   *nats.Msg
+	handlers              HandlersChain
+	ByteReplyPayload      []byte
+	JSONReplyPayload      interface{}
+	didReply              bool
+	index                 int8
+	NatsConnection        *nats.Conn
+	NatsEncodedConnection *nats.EncodedConn
+	Err                   error
+	Keys                  map[string]interface{}
+	outWriter             io.ReadWriter
+	errWriter             io.ReadWriter
 }
 
 // Next to be called in middleware to invoke the middleware chain

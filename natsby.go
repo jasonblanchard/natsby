@@ -26,7 +26,7 @@ type Engine struct {
 	subscribers           []*Subscriber
 	middleware            HandlersChain
 	done                  chan bool
-	queueGroup            string // TODO: Make this configurable
+	QueueGroup            string
 	OutWriter             io.ReadWriter
 	ErrWriter             io.ReadWriter
 }
@@ -78,22 +78,23 @@ func (e *Engine) Run(callbacks ...func()) error {
 		func(subscriber *Subscriber) {
 			handler := func(m *nats.Msg) {
 				c := &Context{
-					Msg:       m,
-					handlers:  subscriber.Handlers,
-					Engine:    e,
-					Keys:      make(map[string]interface{}),
-					outWriter: e.OutWriter,
-					errWriter: e.ErrWriter,
+					Msg:                   m,
+					handlers:              subscriber.Handlers,
+					NatsConnection:        e.NatsConnection,
+					NatsEncodedConnection: e.NatsEncodedConnection,
+					Keys:                  make(map[string]interface{}),
+					outWriter:             e.OutWriter,
+					errWriter:             e.ErrWriter,
 				}
 				c.reset()
 				c.Next()
 			}
 
-			if e.queueGroup == "" {
+			if e.QueueGroup == "" {
 				e.NatsConnection.Subscribe(subscriber.Subject, handler)
 				return
 			}
-			e.NatsConnection.QueueSubscribe(subscriber.Subject, e.queueGroup, handler)
+			e.NatsConnection.QueueSubscribe(subscriber.Subject, e.QueueGroup, handler)
 		}(subscriber)
 	}
 

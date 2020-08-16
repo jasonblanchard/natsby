@@ -7,7 +7,7 @@ func WithByteReply() HandlerFunc {
 
 		if c.Msg.Reply != "" {
 			c.didReply = true
-			c.Engine.NatsConnection.Publish(c.Msg.Reply, c.ByteReplyPayload)
+			c.NatsConnection.Publish(c.Msg.Reply, c.ByteReplyPayload)
 		}
 	}
 }
@@ -17,9 +17,9 @@ func WithJSONReply() HandlerFunc {
 	return func(c *Context) {
 		c.Next()
 
-		if c.Engine.NatsEncodedConnection != nil && c.Msg.Reply != "" {
+		if c.NatsEncodedConnection != nil && c.Msg.Reply != "" {
 			c.didReply = true
-			c.Engine.NatsEncodedConnection.Publish(c.Msg.Reply, c.JSONReplyPayload)
+			c.NatsEncodedConnection.Publish(c.Msg.Reply, c.JSONReplyPayload)
 		}
 	}
 }

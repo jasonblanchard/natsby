@@ -3,6 +3,7 @@ package natsby
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/assert"
@@ -44,4 +45,44 @@ func TestSubscribe(t *testing.T) {
 	engine.Subscribe("test.subject", handler)
 
 	assert.Equal(t, 1, len(engine.subscribers))
+}
+
+func TestRun(t *testing.T) {
+	nc, _ := nats.Connect(nats.DefaultURL)
+	engine, _ := New(nc)
+	handler := func(c *Context) {
+		c.ByteReplyPayload = []byte("pong")
+	}
+	engine.Subscribe("test.subject", WithByteReply(), handler)
+
+	go engine.Run()
+
+	// Let the listeners regiser
+	time.Sleep(1 * time.Second)
+
+	_, err := nc.Request("test.subject", []byte(""), 1*time.Second)
+	if err != nil {
+		panic(err)
+	}
+
+	engine.Shutdown()
+
+	assert.Equal(t, true, true, "Engine started and shutdown")
+}
+
+func TestRunQueue(t *testing.T) {
+	nc, _ := nats.Connect(nats.DefaultURL)
+	configureQueueGroup := func(e *Engine) error {
+		e.QueueGroup = "group"
+		return nil
+	}
+	engine, _ := New(nc, configureQueueGroup)
+	handler := func(c *Context) {}
+	engine.Subscribe("test.subject", handler)
+
+	go engine.Run()
+
+	engine.Shutdown()
+
+	assert.Equal(t, true, true, "Engine started and shutdown")
 }
