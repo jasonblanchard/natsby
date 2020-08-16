@@ -40,12 +40,11 @@ func New(nc *nats.Conn, options ...func(*Engine) error) (*Engine, error) {
 
 	e.OutWriter = os.Stdout
 	e.ErrWriter = os.Stderr
+	e.NatsConnection = nc
 
 	for _, option := range options {
 		err = option(e)
 	}
-
-	e.NatsConnection = nc
 
 	return e, err
 }
