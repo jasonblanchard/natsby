@@ -38,6 +38,15 @@ func TestNewOptions(t *testing.T) {
 	assert.Equal(t, c, engine.NatsEncodedConnection)
 }
 
+func TestUse(t *testing.T) {
+	e := Engine{}
+	handler := func(c *Context) {}
+
+	e.Use(handler)
+
+	assert.Len(t, e.middleware, 1)
+}
+
 func TestSubscribe(t *testing.T) {
 	engine := Engine{}
 	handler := func(c *Context) {}
@@ -54,8 +63,12 @@ func TestRun(t *testing.T) {
 		c.ByteReplyPayload = []byte("pong")
 	}
 	engine.Subscribe("test.subject", WithByteReply(), handler)
+	didCallCallback := false
+	callback := func() {
+		didCallCallback = true
+	}
 
-	go engine.Run()
+	go engine.Run(callback)
 
 	// Let the listeners regiser
 	time.Sleep(1 * time.Second)
@@ -67,7 +80,7 @@ func TestRun(t *testing.T) {
 
 	engine.Shutdown()
 
-	assert.Equal(t, true, true, "Engine started and shutdown")
+	assert.True(t, didCallCallback)
 }
 
 func TestRunQueue(t *testing.T) {
