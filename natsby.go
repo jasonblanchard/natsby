@@ -27,7 +27,6 @@ type Engine struct {
 }
 
 // New creates a new Router object
-// TODO: Make connection be a required first argument
 func New(nc *nats.Conn, options ...func(*Engine) error) (*Engine, error) {
 	e := &Engine{
 		done: make(chan bool),
@@ -67,7 +66,7 @@ func (e *Engine) combineHandlers(handlers HandlersChain) HandlersChain {
 }
 
 // Run starts all the subscribers and blocks
-func (e *Engine) Run(cbs ...func()) error {
+func (e *Engine) Run(callbacks ...func()) error {
 	for _, subscriber := range e.subscribers {
 		func(subscriber *Subscriber) {
 			handler := func(m *nats.Msg) {
@@ -89,7 +88,7 @@ func (e *Engine) Run(cbs ...func()) error {
 		}(subscriber)
 	}
 
-	for _, cb := range cbs {
+	for _, cb := range callbacks {
 		cb()
 	}
 

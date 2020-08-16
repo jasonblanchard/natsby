@@ -40,7 +40,7 @@ func (c *Context) Get(k string) interface{} {
 	return c.Keys[k]
 }
 
-// GetByteReplyPayload getter for by reply payload with metadata about if it was set
+// GetByteReplyPayload getter for byte reply payload with metadata about if it was set
 func (c *Context) GetByteReplyPayload() ([]byte, bool) {
 	if c.didReply == false {
 		return []byte(""), false
