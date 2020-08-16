@@ -27,6 +27,7 @@ func recovery(handle RecoveryFunc) HandlerFunc {
 	return func(c *Context) {
 		defer func() {
 			if err := recover(); err != nil {
+				log.SetOutput(c.errWriter)
 				log.Printf("panic recovered %v %s", err, debug.Stack())
 				handle(c, err)
 			}

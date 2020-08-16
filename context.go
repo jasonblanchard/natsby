@@ -1,6 +1,8 @@
 package natsby
 
 import (
+	"io"
+
 	"github.com/nats-io/nats.go"
 )
 
@@ -15,6 +17,8 @@ type Context struct {
 	Engine           *Engine // TODO: Exposing too much?
 	Err              error
 	Keys             map[string]interface{}
+	outWriter        io.ReadWriter
+	errWriter        io.ReadWriter
 }
 
 // Next to be called in middleware to invoke the middleware chain

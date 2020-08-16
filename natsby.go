@@ -1,6 +1,9 @@
 package natsby
 
 import (
+	"io"
+	"os"
+
 	"github.com/nats-io/nats.go"
 )
 
@@ -24,6 +27,8 @@ type Engine struct {
 	middleware            HandlersChain
 	done                  chan bool
 	queueGroup            string // TODO: Make this configurable
+	OutWriter             io.ReadWriter
+	ErrWriter             io.ReadWriter
 }
 
 // New creates a new Router object
@@ -32,6 +37,9 @@ func New(nc *nats.Conn, options ...func(*Engine) error) (*Engine, error) {
 		done: make(chan bool),
 	}
 	var err error
+
+	e.OutWriter = os.Stdout
+	e.ErrWriter = os.Stderr
 
 	for _, option := range options {
 		err = option(e)
@@ -71,10 +79,12 @@ func (e *Engine) Run(callbacks ...func()) error {
 		func(subscriber *Subscriber) {
 			handler := func(m *nats.Msg) {
 				c := &Context{
-					Msg:      m,
-					handlers: subscriber.Handlers,
-					Engine:   e,
-					Keys:     make(map[string]interface{}),
+					Msg:       m,
+					handlers:  subscriber.Handlers,
+					Engine:    e,
+					Keys:      make(map[string]interface{}),
+					outWriter: e.OutWriter,
+					errWriter: e.ErrWriter,
 				}
 				c.reset()
 				c.Next()
