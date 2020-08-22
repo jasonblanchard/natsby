@@ -2,6 +2,7 @@ package natsby
 
 import (
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -19,6 +20,23 @@ func TestNext(t *testing.T) {
 
 	c.Next()
 	assert.Equal(t, true, setOutHandlerCalled)
+}
+
+func TestNextWithLatencyDuration(t *testing.T) {
+	setOutHandlerCalled := false
+
+	setOutHandler := func(c *Context) {
+		setOutHandlerCalled = true
+	}
+	c := Context{
+		handlers: HandlersChain{setOutHandler},
+	}
+	c.reset()
+
+	latency := c.NextWithLatencyDuration()
+	assert.Equal(t, true, setOutHandlerCalled)
+	var d time.Duration
+	assert.IsType(t, d, latency)
 }
 
 func TestKeys(t *testing.T) {

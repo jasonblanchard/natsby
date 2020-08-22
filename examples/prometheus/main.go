@@ -15,9 +15,9 @@ func main() {
 	}
 
 	engine.Use(natsby.WithLogger(natsby.DefaultLogger()))
-	engine.Use(natsby.WithPrometheus(&natsby.WithPrometheusInput{
-		Port: "2112",
-	}))
+
+	observer := natsby.NewPrometheusObserver("2112")
+	engine.Use(natsby.WithObserver(observer))
 
 	engine.Subscribe("ping", natsby.WithByteReply(), func(c *natsby.Context) {
 		// time.Sleep(time.Duration(rand.Intn(2)) * time.Second)

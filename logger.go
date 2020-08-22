@@ -22,12 +22,7 @@ func WithLogger(logger *zerolog.Logger) HandlerFunc {
 			Str("subject", c.Msg.Subject).
 			Msg("received")
 
-		start := time.Now()
-
-		c.Next()
-
-		end := time.Now()
-		latency := end.Sub(start)
+		latency := c.NextWithLatencyDuration()
 
 		if c.Err != nil {
 			logger.Error().

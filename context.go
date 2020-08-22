@@ -2,6 +2,7 @@ package natsby
 
 import (
 	"io"
+	"time"
 
 	"github.com/nats-io/nats.go"
 )
@@ -31,6 +32,14 @@ func (c *Context) Next() {
 	}
 }
 
+// NextWithLatencyDuration Calls Next() and returns duration of execution
+func (c *Context) NextWithLatencyDuration() time.Duration {
+	start := time.Now()
+	c.Next()
+	end := time.Now()
+	return end.Sub(start)
+}
+
 func (c *Context) reset() {
 	c.index = -1
 }
@@ -55,3 +64,5 @@ func (c *Context) GetByteReplyPayload() ([]byte, bool) {
 	}
 	return c.ByteReplyPayload, true
 }
+
+// TODO: GetJSONReplyPayload
