@@ -8,8 +8,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
-// PrometheusObserver observer for sending metrics to Prometheus
-type PrometheusObserver struct {
+// PrometheusCollector observer for sending metrics to Prometheus
+type PrometheusCollector struct {
 	port                    string
 	messagesReceivedCounter *prometheus.CounterVec
 	repliesSentCounter      *prometheus.CounterVec
@@ -18,16 +18,16 @@ type PrometheusObserver struct {
 	isTesting               bool
 }
 
-// NewPrometheusObserver initialize new Prometheus observer
-func NewPrometheusObserver(port string) *PrometheusObserver {
-	p := &PrometheusObserver{}
+// NewPrometheusCollector initialize new Prometheus observer
+func NewPrometheusCollector(port string) *PrometheusCollector {
+	p := &PrometheusCollector{}
 	p.setupCollectors()
 	p.port = port
 	return p
 }
 
 // Collect starts prometheus server on p.port in a new goroutine
-func (p *PrometheusObserver) Collect() error {
+func (p *PrometheusCollector) Collect() error {
 	go func() {
 		http.Handle("/metrics", promhttp.Handler())
 		if p.isTesting == false {
@@ -37,27 +37,27 @@ func (p *PrometheusObserver) Collect() error {
 	return nil
 }
 
-// ObserveSubjectReceived increment counter when message is received
-func (p *PrometheusObserver) ObserveSubjectReceived(subject string) {
+// CollectSubjectReceived increment counter when message is received
+func (p *PrometheusCollector) CollectSubjectReceived(subject string) {
 	p.messagesReceivedCounter.WithLabelValues(subject).Inc()
 }
 
-// ObserveLatency set histogram value for latency
-func (p *PrometheusObserver) ObserveLatency(subject string, latency time.Duration) {
+// CollectLatency set histogram value for latency
+func (p *PrometheusCollector) CollectLatency(subject string, latency time.Duration) {
 	p.latencyHistogram.WithLabelValues(subject).Observe(latency.Seconds())
 }
 
-// ObserveReply increment counter for replies
-func (p *PrometheusObserver) ObserveReply(subject string) {
+// CollectReply increment counter for replies
+func (p *PrometheusCollector) CollectReply(subject string) {
 	p.repliesSentCounter.WithLabelValues(subject).Inc()
 }
 
-// ObserveError increment counter for errors
-func (p *PrometheusObserver) ObserveError(subject string) {
+// CollectError increment counter for errors
+func (p *PrometheusCollector) CollectError(subject string) {
 	p.errorsCounter.WithLabelValues(subject).Inc()
 }
 
-func (p *PrometheusObserver) setupCollectors() error {
+func (p *PrometheusCollector) setupCollectors() error {
 	p.messagesReceivedCounter = prometheus.NewCounterVec(
 		prometheus.CounterOpts{
 			Name: "natsby_messages_received_total_by_subject",
@@ -77,8 +77,6 @@ func (p *PrometheusObserver) setupCollectors() error {
 	p.latencyHistogram = prometheus.NewHistogramVec(prometheus.HistogramOpts{
 		Name: "natsby_latency_histogram",
 		Help: "Histogram of latencies for message handling, partitioned by subject",
-		// TODO: Make this configurable
-		// Buckets: prometheus.LinearBuckets(20, 5, 5),
 	},
 		[]string{"subject"},
 	)
