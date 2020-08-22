@@ -1,0 +1,11 @@
+name: test
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@master
+      - name: Start NATS
+        run: make nats
+      - name: Run tests
+        run: make test
