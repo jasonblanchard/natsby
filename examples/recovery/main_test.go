@@ -5,25 +5,23 @@ import (
 	"time"
 
 	"github.com/nats-io/nats.go"
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(t *testing.T) {
-	Convey("it works", t, func() {
-		nc, err := nats.Connect(nats.DefaultURL)
-		if err != nil {
-			panic(err)
-		}
+	nc, err := nats.Connect(nats.DefaultURL)
+	if err != nil {
+		panic(err)
+	}
 
-		response, err := nc.Request("panic", []byte(""), time.Second*1)
+	response, err := nc.Request("panic", []byte(""), time.Second*1)
 
-		So(err, ShouldBeNil)
-		So(string(response.Data), ShouldEqual, "oops")
+	assert.Nil(t, err)
+	assert.Equal(t, "oops", string(response.Data))
 
-		time.Sleep(1 * time.Second)
-		response, err = nc.Request("ping", []byte(""), time.Second*1)
+	time.Sleep(1 * time.Second)
+	response, err = nc.Request("ping", []byte(""), time.Second*1)
 
-		So(err, ShouldBeNil)
-		So(string(response.Data), ShouldEqual, "pong")
-	})
+	assert.Nil(t, err)
+	assert.Equal(t, "pong", string(response.Data))
 }
