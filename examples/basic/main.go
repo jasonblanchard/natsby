@@ -22,14 +22,4 @@ func main() {
 	engine.Run(func() {
 		logger.Info().Msg("Ready 🚀")
 	})
-
-	// c := make(chan os.Signal, 1)
-	// signal.Notify(c, syscall.SIGINT)
-	// go func() {
-	// 	// Wait for signal
-	// 	<-c
-	// 	engine.NatsConnection.Drain()
-	// 	os.Exit(0)
-	// }()
-	// runtime.Goexit()
 }
