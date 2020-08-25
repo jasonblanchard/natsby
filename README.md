@@ -1,5 +1,5 @@
 # Natsby
-![ci status](https://github.com/jasonblanchard/natsby/workflows/CI/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/jasonblanchard/natsby/badge.svg?branch=master)](https://coveralls.io/github/jasonblanchard/natsby?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/jasonblanchard/natsby)](https://goreportcard.com/report/github.com/jasonblanchard/natsby)
+[![PkgGoDev](https://pkg.go.dev/badge/github.com/jasonblanchard/natsby)](https://pkg.go.dev/github.com/jasonblanchard/natsby) ![ci status](https://github.com/jasonblanchard/natsby/workflows/CI/badge.svg) [![Coverage Status](https://coveralls.io/repos/github/jasonblanchard/natsby/badge.svg?branch=master)](https://coveralls.io/github/jasonblanchard/natsby?branch=master) [![Go Report Card](https://goreportcard.com/badge/github.com/jasonblanchard/natsby)](https://goreportcard.com/report/github.com/jasonblanchard/natsby)
 
 
 Natsby enables [NATS](https://github.com/nats-io)-driven services.
