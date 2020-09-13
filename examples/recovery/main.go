@@ -20,7 +20,7 @@ func main() {
 		logger.Error().Msg(fmt.Sprintf("%v", err))
 
 		if c.Msg.Reply != "" {
-			c.NatsConnection.Publish(c.Msg.Reply, []byte("oops"))
+			c.Conn.Publish(c.Msg.Reply, []byte("oops"))
 		}
 	}))
 	// engine.Use(natsby.WithRecovery())

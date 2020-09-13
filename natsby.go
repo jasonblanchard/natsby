@@ -21,14 +21,14 @@ type Subscriber struct {
 
 // Engine framework instance
 type Engine struct {
-	NatsConnection        *nats.Conn
-	NatsEncodedConnection *nats.EncodedConn
-	subscribers           []*Subscriber
-	middleware            HandlersChain
-	done                  chan bool
-	QueueGroup            string
-	OutWriter             io.ReadWriter
-	ErrWriter             io.ReadWriter
+	*nats.Conn
+	*nats.EncodedConn
+	subscribers []*Subscriber
+	middleware  HandlersChain
+	done        chan bool
+	QueueGroup  string
+	OutWriter   io.ReadWriter
+	ErrWriter   io.ReadWriter
 }
 
 // New creates a new Router object
@@ -40,7 +40,7 @@ func New(nc *nats.Conn, options ...func(*Engine) error) (*Engine, error) {
 
 	e.OutWriter = os.Stdout
 	e.ErrWriter = os.Stderr
-	e.NatsConnection = nc
+	e.Conn = nc
 
 	for _, option := range options {
 		err = option(e)
@@ -78,23 +78,23 @@ func (e *Engine) Run(callbacks ...func()) error {
 		func(subscriber *Subscriber) {
 			handler := func(m *nats.Msg) {
 				c := &Context{
-					Msg:                   m,
-					handlers:              subscriber.Handlers,
-					NatsConnection:        e.NatsConnection,
-					NatsEncodedConnection: e.NatsEncodedConnection,
-					Keys:                  make(map[string]interface{}),
-					outWriter:             e.OutWriter,
-					errWriter:             e.ErrWriter,
+					Msg:         m,
+					handlers:    subscriber.Handlers,
+					Conn:        e.Conn,
+					EncodedConn: e.EncodedConn,
+					Keys:        make(map[string]interface{}),
+					outWriter:   e.OutWriter,
+					errWriter:   e.ErrWriter,
 				}
 				c.reset()
 				c.Next()
 			}
 
 			if e.QueueGroup == "" {
-				e.NatsConnection.Subscribe(subscriber.Subject, handler)
+				e.Conn.Subscribe(subscriber.Subject, handler)
 				return
 			}
-			e.NatsConnection.QueueSubscribe(subscriber.Subject, e.QueueGroup, handler)
+			e.Conn.QueueSubscribe(subscriber.Subject, e.QueueGroup, handler)
 		}(subscriber)
 	}
 
@@ -104,7 +104,7 @@ func (e *Engine) Run(callbacks ...func()) error {
 
 	<-e.done
 
-	e.NatsConnection.Drain()
+	e.Conn.Drain()
 
 	return nil
 }

@@ -15,7 +15,7 @@ func main() {
 		if err != nil {
 			return err
 		}
-		e.NatsEncodedConnection = c
+		e.EncodedConn = c
 		return nil
 	}
 

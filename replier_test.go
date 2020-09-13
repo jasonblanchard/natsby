@@ -10,7 +10,7 @@ import (
 func TestWithByteReply(t *testing.T) {
 	nc, _ := nats.Connect(nats.DefaultURL)
 	context := &Context{
-		NatsConnection: nc,
+		Conn: nc,
 		Msg: &nats.Msg{
 			Reply: "reply.inbox",
 		},
@@ -27,12 +27,12 @@ func TestWithJsonReply(t *testing.T) {
 	nc, _ := nats.Connect(nats.DefaultURL)
 	encodedConnection, _ := nats.NewEncodedConn(nc, nats.JSON_ENCODER)
 	context := &Context{
-		NatsConnection: nc,
+		Conn: nc,
 		Msg: &nats.Msg{
 			Reply: "reply.inbox",
 		},
-		ByteReplyPayload:      []byte(""),
-		NatsEncodedConnection: encodedConnection,
+		ByteReplyPayload: []byte(""),
+		EncodedConn:      encodedConnection,
 	}
 	handler := WithJSONReply()
 

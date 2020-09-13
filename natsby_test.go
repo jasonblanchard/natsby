@@ -15,7 +15,7 @@ func TestNew(t *testing.T) {
 
 	assert.Equal(t, os.Stdout, engine.OutWriter)
 	assert.Equal(t, os.Stderr, engine.ErrWriter)
-	assert.Equal(t, nc, engine.NatsConnection)
+	assert.Equal(t, nc, engine.Conn)
 }
 
 func TestNewOptions(t *testing.T) {
@@ -23,19 +23,19 @@ func TestNewOptions(t *testing.T) {
 	var c *nats.EncodedConn
 	configureEncodedConnection := func(e *Engine) error {
 		var err error
-		c, err = nats.NewEncodedConn(e.NatsConnection, nats.JSON_ENCODER)
+		c, err = nats.NewEncodedConn(e.Conn, nats.JSON_ENCODER)
 		if err != nil {
 			return err
 		}
-		e.NatsEncodedConnection = c
+		e.EncodedConn = c
 		return nil
 	}
 	engine, _ := New(nc, configureEncodedConnection)
 
 	assert.Equal(t, os.Stdout, engine.OutWriter)
 	assert.Equal(t, os.Stderr, engine.ErrWriter)
-	assert.Equal(t, nc, engine.NatsConnection)
-	assert.Equal(t, c, engine.NatsEncodedConnection)
+	assert.Equal(t, nc, engine.Conn)
+	assert.Equal(t, c, engine.EncodedConn)
 }
 
 func TestUse(t *testing.T) {
